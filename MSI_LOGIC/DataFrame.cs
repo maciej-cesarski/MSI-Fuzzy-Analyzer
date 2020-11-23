@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace MSI_Logic
@@ -88,11 +87,6 @@ namespace MSI_Logic
             }
         }
 
-        private void AssignData(float[][] newData)
-        {
-            this.data = newData;
-        }
-
         public DataFrame(string[] newRows)
         {
             this.AssignData(newRows);
@@ -103,40 +97,8 @@ namespace MSI_Logic
             string[] dataRows = System.IO.File.ReadAllLines(filename);
             return new DataFrame(dataRows);
         }
-
-        public static DataFrame GetProjects()
-        {
-            DataFrame df = new DataFrame(3, 5);
-
-            df.data[0] = new float[] { 0.9f, 0.6f, 0.8f, 0.2f, 0.8f };
-            df.data[1] = new float[] { 0.4f, 0.8f, 1.0f, 0.9f, 0.6f };
-            df.data[2] = new float[] { 1.0f, 0.5f, 0.6f, 0.7f, 0.9f };
-
-            return df;
-        }
-
-
-
-        public static DataFrame GetRevisors()
-        {
-            DataFrame df = new DataFrame(4, 5);
-
-            df.data[0] = new float[] { 0.9f, 0.0f, 1.0f, 0.6f, 0.3f };
-            df.data[1] = new float[] { 0.7f, 0.9f, 0.6f, 1.0f, 0.5f };
-            df.data[2] = new float[] { 1.0f, 0.4f, 1.0f, 0.2f, 0.5f };
-            df.data[3] = new float[] { 0.6f, 0.7f, 0.8f, 1.0f, 0.6f };
-
-            //df.data[0] = new float[] { 0.2f, 0.5f, 1.0f, 1.0f, 0.4f };
-            //df.data[1] = new float[] { 0.4f, 1.0f, 1.0f, 0.4f, 0.6f };
-            //df.data[2] = new float[] { 1.0f, 0.6f, 0.6f, 0.8f, 0.7f };
-            //df.data[3] = new float[] { 0.6f, 0.3f, 0.9f, 1.0f, 0.0f };
-            //df.data[4] = new float[] { 0.2f, 0.8f, 0.7f, 0.5f, 0.1f };
-            //df.data[5] = new float[] { 1.0f, 0.5f, 0.7f, 0.6f, 0.9f };
-
-            return df;
-        }
-
-        public static (DataFrame df1, DataFrame df2) Get2(DataFrame df)
+        
+        private static (DataFrame df1, DataFrame df2) Get2(DataFrame df)
         {
             DataFrame df1 = new DataFrame(df.Rows, df.Cols);
             DataFrame df2 = new DataFrame(df.Rows, df.Cols);
@@ -150,7 +112,7 @@ namespace MSI_Logic
             return (df1, df2);
         }
 
-        public static (DataFrame df1, DataFrame df2, DataFrame df3) Get3From2((DataFrame df1, DataFrame df2) data)
+        private static (DataFrame df1, DataFrame df2, DataFrame df3) Get3From2((DataFrame df1, DataFrame df2) data)
         {
             DataFrame df1 = new DataFrame(data.df1.Rows, data.df1.Cols);
             DataFrame df2 = new DataFrame(data.df1.Rows, data.df1.Cols);
@@ -191,91 +153,6 @@ namespace MSI_Logic
             }
 
             return df;
-        }
-
-        //czyli to jest źle?
-        //powinno sie zwracac ARGUMENT dla którego to jest najmniejsze XD trzeba zwrócić najmniejszego Y/X
-
-        public float Oper3(int rowIndex, int colIndex, float value)
-        {
-            float[] results = new float[Cols];
-
-            for (int i = 0; i < Cols; i++)
-            {
-                results[i] = Utils.Imp(data[rowIndex][i], value);
-            }
-
-            int minIndex = 0;
-
-            for (int i = 0; i < results.Length; i++)
-            {
-                if (results[i] < results[minIndex]) minIndex = i;
-            }
-
-            return results[minIndex];
-        }
-
-        //x to jest konkretna wartość z tabelki data[rowIndex][colIndex]
-
-        public float Oper4(int rowIndex, int colIndex, float value)
-        {
-            float[] results = new float[Cols];
-
-            for (int i = 0; i < Cols; i++)
-            {
-                results[i] = Utils.TNorm(Utils.Neg(value), Utils.Neg(data[rowIndex][i]));
-            }
-
-            int maxIndex = 0;
-
-            for (int i = 0; i < results.Length; i++)
-            {
-                if (results[i] > results[maxIndex]) maxIndex = i;
-            }
-
-            return results[maxIndex];
-        }
-
-
-        //teraz to samo, ale przeszukujemy kolumnę
-        public float Oper3_Inv(int rowIndex, int colIndex, float value)
-        {
-            float[] results = new float[Rows];
-
-            for (int i = 0; i < Rows; i++)
-            {
-                results[i] = Utils.Imp(data[i][colIndex], value);
-            }
-
-            int minIndex = 0;
-
-            for (int i = 0; i < results.Length; i++)
-            {
-                if (results[i] < results[minIndex]) minIndex = i;
-            }
-
-            return results[minIndex];
-        }
-
-        //x to jest konkretna wartość z tabelki data[rowIndex][colIndex]
-
-        public float Oper4_Inv(int rowIndex, int colIndex, float value)
-        {
-            float[] results = new float[Rows];
-
-            for (int i = 0; i < Rows; i++)
-            {
-                results[i] = Utils.TNorm(Utils.Neg(value), Utils.Neg(data[i][colIndex]));
-            }
-
-            int maxIndex = 0;
-
-            for (int i = 0; i < results.Length; i++)
-            {
-                if (results[i] > results[maxIndex]) maxIndex = i;
-            }
-
-            return results[maxIndex];
         }
 
         public float DeltaHelper(float RXY, float BY)
@@ -354,48 +231,6 @@ namespace MSI_Logic
             return returnVector;
         }
 
-        public void Print()
-        {
-            Console.WriteLine();
-            for (int i = 0; i < Rows; i++)
-            {
-                for (int j = 0; j < Cols; j++)
-                {
-                    Console.Write(String.Format("{0:0.00} ", Math.Abs(data[i][j])));
-                }
-                Console.WriteLine();
-            }
-        }
-
-        public static void Print2(DataFrame df1, DataFrame df2)
-        {
-            Console.WriteLine();
-            for (int i = 0; i < df1.Rows; i++)
-            {
-                for (int j = 0; j < df1.Cols; j++)
-                {
-                    Console.Write(String.Format("({0:0.0}, ", Math.Abs(df1.data[i][j])));
-                    Console.Write(String.Format("{0:0.0}) ", Math.Abs(df2.data[i][j])));
-                }
-                Console.WriteLine();
-            }
-        }
-
-        public static void Print3(DataFrame df1, DataFrame df2, DataFrame df3)
-        {
-            Console.WriteLine();
-            for (int i = 0; i < df1.Rows; i++)
-            {
-                for (int j = 0; j < df1.Cols; j++)
-                {
-                    Console.Write(String.Format("({0:0.0}, ", Math.Abs(df1.data[i][j])));
-                    Console.Write(String.Format("{0:0.0}, ", Math.Abs(df2.data[i][j])));
-                    Console.Write(String.Format("{0:0.0}) ", Math.Abs(df3.data[i][j])));
-                }
-                Console.WriteLine();
-            }
-        }
-
         public string ToStringRow(int index)
         {
             string s = "";
@@ -419,34 +254,6 @@ namespace MSI_Logic
             }
 
             return lines;
-        }
-    }
-
-    public class Program
-    {
-        static void Main(string[] args)
-        {
-            var dfP = DataFrame.GetProjects();
-            var dfR = DataFrame.GetRevisors();
-
-            dfP.Print();
-            dfR.Print();
-
-            var dfP2 = DataFrame.Get2(dfP);
-            DataFrame.Print2(dfP2.df1, dfP2.df2);
-
-            var dfR2 = DataFrame.Get2(dfR);
-            DataFrame.Print2(dfR2.df1, dfR2.df2);
-
-            var dfR3 = DataFrame.Get3From2(dfR2);
-            var dfP3 = DataFrame.Get3From2(dfP2);
-
-            DataFrame.Print3(dfP3.df1, dfP3.df2, dfP3.df3);
-            DataFrame.Print3(dfR3.df1, dfR3.df2, dfR3.df3);
-
-            var distances = DataFrame.Calculate(dfP, dfR);
-
-            distances.Print();
         }
     }
 }

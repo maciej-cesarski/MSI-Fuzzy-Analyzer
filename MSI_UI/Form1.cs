@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using MSI_Logic;
 
@@ -66,7 +60,7 @@ namespace MSI_UI
         {
             Button loadButton = new Button();
             loadButton.Anchor = AnchorStyles.Top;
-            loadButton.Text = "Load from file";
+            loadButton.Text = "Wczytaj z pliku";
             loadButton.Click += LoadProjects;
             loadButton.Size = new Size(100, 30);
 
@@ -83,7 +77,7 @@ namespace MSI_UI
         {
             Button loadButton = new Button();
             loadButton.Anchor = AnchorStyles.Top;
-            loadButton.Text = "Load from file";
+            loadButton.Text = "Wczytaj z pliku";
             loadButton.Click += LoadRevisors;
             loadButton.Size = new Size(100, 30);
 
@@ -154,8 +148,8 @@ namespace MSI_UI
 
         public bool RevalidateDataFromUI()
         {
-            return RevalidateDataFromGrid(projectsDataGrid, projectsDataFrame, "Projects")
-                && RevalidateDataFromGrid(revisorsDataGrid, revisorsDataFrame, "Revisors");
+            return RevalidateDataFromGrid(projectsDataGrid, projectsDataFrame, "Projekty")
+                && RevalidateDataFromGrid(revisorsDataGrid, revisorsDataFrame, "Recenzenci");
         }
 
         public bool RevalidateDataFromGrid(DataGridView input, DataFrame output, string gridName)
@@ -328,7 +322,7 @@ namespace MSI_UI
         {
             Button loadButton = new Button();
             loadButton.Anchor = AnchorStyles.Top;
-            loadButton.Text = "Calculate";
+            loadButton.Text = "Oblicz";
             loadButton.Click += (object sender, EventArgs e) => { action.Invoke(); };
             loadButton.Size = new Size(100, 30);
 
@@ -364,19 +358,19 @@ namespace MSI_UI
         public void IntializeProjectsComponent()
         {
             projectsGroupBox = GetProjectsGroupBox(projectsDataFrame, projectsDataGrid);
-            projectsGroupBox.Text = "Projects";
+            projectsGroupBox.Text = "Projekty";
         }
 
         public void IntializeRevisorsComponent()
         {
             revisorsGroupBox = GetRevisorsGroupBox(revisorsDataFrame, revisorsDataGrid);
-            revisorsGroupBox.Text = "Revisors";
+            revisorsGroupBox.Text = "Recenzenci";
         }
 
         public void IntializeResultsComponent()
         {
             resultsGroupBox = GetOutputGroupBox(resultsDataFrame, resultsDataGrid);
-            resultsGroupBox.Text = "Results";
+            resultsGroupBox.Text = "Wyniki";
         }
 
         public void RecalculateUI()
