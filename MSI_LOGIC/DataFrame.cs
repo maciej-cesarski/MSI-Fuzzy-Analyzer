@@ -255,5 +255,22 @@ namespace MSI_Logic
 
             return lines;
         }
+
+        public static DataFrame GenerateRandom(int rows, int columns)
+        {
+            DataFrame df = new DataFrame(rows, columns);
+
+            Random RNG = new Random();
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    df.data[i][j] = (float)RNG.NextDouble();
+                }
+            }
+
+            return df;
+        }
     }
 }
