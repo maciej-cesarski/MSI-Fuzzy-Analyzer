@@ -350,13 +350,14 @@ namespace MSI_UI
             {
                 try
                 {
-                    df = DataFrame.LoadFromFile(dialog.FileName);
                     string[] dataRows = File.ReadAllLines(dialog.FileName);
                     string[] headers = null;
                     if (!(dataRows[0].Contains(',') || dataRows[0].Contains('.')))
                     {
                         headers = dataRows[0].Split(';');
+                        df = new DataFrame(dataRows.Skip(1).ToArray());
                     }
+                    else df = new DataFrame(dataRows);
                     FillDataGrid(dataGrid, df, headers);
                 }
                 catch (Exception ex)
