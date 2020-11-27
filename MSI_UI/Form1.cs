@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+
 using MSI_Logic;
+
 
 namespace MSI_UI
 {
@@ -255,7 +261,12 @@ namespace MSI_UI
             if (RevalidateDataFromUI() == false) return;
 
             resultsDataFrame = DataFrame.Calculate(projectsDataFrame, revisorsDataFrame);
-            FillDataGrid(resultsDataGrid, resultsDataFrame);
+            string[] headers = new string[resultsDataFrame.Cols];
+            for (int i = 0; i < resultsDataFrame.Cols; i++)
+            {
+                headers[i] = $"Praca dyplomowa {i + 1}";
+            }
+            FillDataGrid(resultsDataGrid, resultsDataFrame, headers);
             MarkBestRowsInResults();
         }
 
@@ -340,7 +351,13 @@ namespace MSI_UI
                 try
                 {
                     df = DataFrame.LoadFromFile(dialog.FileName);
-                    FillDataGrid(dataGrid, df);
+                    string[] dataRows = File.ReadAllLines(dialog.FileName);
+                    string[] headers = null;
+                    if (!(dataRows[0].Contains(',') || dataRows[0].Contains('.')))
+                    {
+                        headers = dataRows[0].Split(';');
+                    }
+                    FillDataGrid(dataGrid, df, headers);
                 }
                 catch (Exception ex)
                 {

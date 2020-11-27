@@ -95,6 +95,8 @@ namespace MSI_Logic
         public static DataFrame LoadFromFile(string filename)
         {
             string[] dataRows = System.IO.File.ReadAllLines(filename);
+            if (!(dataRows[0].Contains(',') || dataRows[0].Contains('.')))
+                dataRows = dataRows.Skip(1).ToArray();
             return new DataFrame(dataRows);
         }
         
