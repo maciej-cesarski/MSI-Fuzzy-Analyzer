@@ -7,7 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 using MSI_Logic;
-
+using System.Data;
 
 namespace MSI_UI
 {
@@ -75,7 +75,7 @@ namespace MSI_UI
 
         private void LoadProjects(object sender, EventArgs e)
         {
-            LoadFileToDataFrameAndFillDataGrid(ref projectsDataFrame, projectsDataGrid);
+            LoadFileToDataFrameAndFillDataGrid(ref projectsDataFrame, projectsDataGrid, "Projekt");
             RecalculateUI();
         }
 
@@ -92,7 +92,7 @@ namespace MSI_UI
 
         private void LoadRevisors(object sender, EventArgs e)
         {
-            LoadFileToDataFrameAndFillDataGrid(ref revisorsDataFrame, revisorsDataGrid);
+            LoadFileToDataFrameAndFillDataGrid(ref revisorsDataFrame, revisorsDataGrid, "Osoba");
             RecalculateUI();
         }
 
@@ -118,6 +118,7 @@ namespace MSI_UI
             saveButton.Size = new Size(100, 30);
 
             grid.Parent = box;
+            grid.RowHeadersWidth = 80;
 
             return box;
         }
@@ -197,7 +198,7 @@ namespace MSI_UI
 
             for (int i=0; i< newRowCount; i++)
             {
-                for(int j = 0; j< output.Cols; j++)
+                for(int j = 1; j< output.Cols; j++)
                 {
                     bool stringFormatError = false;
                     
@@ -230,7 +231,7 @@ namespace MSI_UI
                         return false;
                     }
 
-                    newData[i][j] = parsed;
+                    newData[i][j-1] = parsed;
                 }
             }
 
@@ -266,8 +267,33 @@ namespace MSI_UI
             {
                 headers[i] = $"Praca dyplomowa {i + 1}";
             }
-            FillDataGrid(resultsDataGrid, resultsDataFrame, headers);
+            //FillDataGrid(resultsDataGrid, resultsDataFrame, GetRevisorNames(), GetProjectNames());
+            FillOutputDataGrid(resultsDataGrid, resultsDataFrame, GetProjectNames(), GetRevisorNames());
             MarkBestRowsInResults();
+        }
+
+        public string[] GetRevisorNames()
+        {
+            List<string> names = new List<string>();
+
+            for(int i=0; i<revisorsDataGrid.Rows.Count-1; i++)
+            {
+                names.Add(revisorsDataGrid.Rows[i].Cells[0].Value.ToString());
+            }
+
+            return names.ToArray();
+        }
+
+        public string[] GetProjectNames()
+        {
+            List<string> names = new List<string>();
+
+            for (int i = 0; i < projectsDataGrid.Rows.Count-1; i++)
+            {
+                names.Add(projectsDataGrid.Rows[i].Cells[0].Value.ToString());
+            }
+
+            return names.ToArray();
         }
 
         public static DataGridView GetInitialDataGrid()
@@ -276,20 +302,68 @@ namespace MSI_UI
             return dataGrid;
         }
 
-        public DataGridView FillDataGrid(DataGridView dataGrid, DataFrame df, string[] header = null)
+        public DataGridView FillDataGrid(DataGridView dataGrid, DataFrame df, string[] header, string[] rowNames, string firstColumnName = null)
         {
-            ClearDataGrid(dataGrid);
-            GenerateHeadersInDataGrid(df, dataGrid, header);
+            DataTable dataTable = new DataTable();
+
+            if (firstColumnName != null)
+            {
+                dataTable.Columns.Add(firstColumnName, typeof(string));
+            }            
+
+            for (int i=0; i<header.Length; i++)
+            {
+                dataTable.Columns.Add(header[i], typeof(float));
+            }
+
+            for(int i=0; i<df.Rows; i++)
+            {
+                var row = df.GetRow(i);
+
+                List<object> entities = new List<object>();
+                entities.Add(rowNames[i]);
+                
+                foreach(var v in row)
+                {
+                    entities.Add(v);
+                }
+                
+                dataTable.Rows.Add(entities.ToArray());
+            }
+
+            dataGrid.DataSource = dataTable;
+
+            return dataGrid;
+        }
+
+        public DataGridView FillOutputDataGrid(DataGridView dataGrid, DataFrame df, string[] colNames, string[] rowNames)
+        {
+            DataTable dataTable = new DataTable();
+
+            for (int i = 0; i < colNames.Length; i++)
+            {
+                dataTable.Columns.Add(colNames[i], typeof(float));
+            }
 
             for (int i = 0; i < df.Rows; i++)
             {
-                string[] dataGridRow = new string[df.Cols];
-                for (int j = 0; j < df.Cols; j++)
+                var row = df.GetRow(i);
+
+                List<object> entities = new List<object>();
+
+                foreach (var v in row)
                 {
-                    string cellValue = df.data[i][j].ToString();
-                    dataGridRow[j] = cellValue.Substring(0, Math.Min(cellValue.Length, 4));
+                    entities.Add(v);
                 }
-                dataGrid.Rows.Add(dataGridRow);
+
+                dataTable.Rows.Add(entities.ToArray());
+            }
+
+            dataGrid.DataSource = dataTable;
+
+            for(int i=0; i<rowNames.Length; i++)
+            {
+                dataGrid.Rows[i].HeaderCell.Value = rowNames[i];
             }
 
             return dataGrid;
@@ -299,35 +373,7 @@ namespace MSI_UI
         {
             dataGrid.Rows.Clear();
             dataGrid.Columns.Clear();
-        }
-
-        public void GenerateHeadersInDataGrid(DataFrame df, DataGridView dataGrid, string[] header)
-        {
-            if (header == null)
-            {
-                for (int i = 0; i < df.Cols; i++)
-                {
-                    dataGrid.Columns.Add($"column {i+1}", $"column {i+1}");
-                }
-            }
-            else
-            {
-                if (header.Length != df.Cols)
-                {
-                    throw new ArgumentException($"argument header ma {header.Length} kolumn, a dataframe ma {df.Cols} kolumn");
-                }
-
-                for (int i = 0; i < header.Length; i++)
-                {
-                    dataGrid.Columns.Add($"column {i+1}", header[i]);
-                }
-            }
-
-            for (int i = 0; i < dataGrid.Columns.Count; i++)
-            {
-                dataGrid.Columns[i].DisplayIndex = i;
-            }
-        }
+        }      
 
         public Button GetBaseCalculateButton(Action action)
         {
@@ -340,7 +386,7 @@ namespace MSI_UI
             return loadButton;
         }
 
-        public void LoadFileToDataFrameAndFillDataGrid(ref DataFrame df, DataGridView dataGrid)
+        public void LoadFileToDataFrameAndFillDataGrid(ref DataFrame df, DataGridView dataGrid, string firstColumnName)
         {
             OpenFileDialog dialog = new OpenFileDialog();
 
@@ -352,13 +398,20 @@ namespace MSI_UI
                 {
                     string[] dataRows = File.ReadAllLines(dialog.FileName);
                     string[] headers = null;
-                    if (!(dataRows[0].Contains(',') || dataRows[0].Contains('.')))
+                    headers = dataRows[0].Split(';');
+                    List<string> rowNames = new List<string>();
+                    List<string> numberData = new List<string>();
+
+                    foreach(var row in dataRows.Skip(1))
                     {
-                        headers = dataRows[0].Split(';');
-                        df = new DataFrame(dataRows.Skip(1).ToArray());
+                        var splitted = row.Split(';').ToList();
+                        rowNames.Add(splitted[0]);
+                        numberData.Add(string.Join(";", splitted.Skip(1).ToArray()));
                     }
-                    else df = new DataFrame(dataRows);
-                    FillDataGrid(dataGrid, df, headers);
+
+                    df = new DataFrame(numberData.ToArray());
+
+                    FillDataGrid(dataGrid, df, headers.Skip(1).ToArray(), rowNames.ToArray(), firstColumnName);
                 }
                 catch (Exception ex)
                 {
