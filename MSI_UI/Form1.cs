@@ -198,7 +198,7 @@ namespace MSI_UI
 
             for (int i=0; i< newRowCount; i++)
             {
-                for(int j = 1; j< output.Cols; j++)
+                for(int j = 1; j< output.Cols+1; j++)
                 {
                     bool stringFormatError = false;
                     
@@ -342,7 +342,7 @@ namespace MSI_UI
 
             for (int i = 0; i < colNames.Length; i++)
             {
-                dataTable.Columns.Add(colNames[i], typeof(float));
+                dataTable.Columns.Add(colNames[i], typeof(string));
             }
 
             for (int i = 0; i < df.Rows; i++)
@@ -353,7 +353,7 @@ namespace MSI_UI
 
                 foreach (var v in row)
                 {
-                    entities.Add(v);
+                    entities.Add(v.ToString("N"));
                 }
 
                 dataTable.Rows.Add(entities.ToArray());
